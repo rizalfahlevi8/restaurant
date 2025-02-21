@@ -12,6 +12,11 @@ import UIKit
      UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
 
+    if(!UserDefaults.standard.bool(forKey: "Notification")) {
+      UIApplication.shared.cancelAllLocalNotifications()
+      UserDefaults.standard.set(true, forKey: "Notification")
+    }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

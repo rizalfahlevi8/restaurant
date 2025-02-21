@@ -18,36 +18,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  final localNotificationService = LocalNotificationService();
+  await localNotificationService.init();
+  await localNotificationService.configureLocalTimeZone();
 
-  runApp(MultiProvider(providers: [
-    Provider(
-      create: (context) => LocalNotificationService()..init(),
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (context) => localNotificationService),
+        Provider(create: (context) => SqliteService()),
+        Provider(create: (context) => SharedPreferencesService(prefs)),
+        ChangeNotifierProvider(create: (context) => IndexNavProvider()),
+        ChangeNotifierProvider(
+            create: (context) =>
+                FavoriteListProvider(context.read<SqliteService>())),
+        Provider(create: (context) => ApiService()),
+        ChangeNotifierProvider(
+            create: (context) =>
+                RestaurantListProvider(context.read<ApiService>())),
+        ChangeNotifierProvider(
+            create: (context) =>
+                RestaurantDetailProvider(context.read<ApiService>())),
+        ChangeNotifierProvider(
+          create: (context) => SettingProvider(
+            context.read<SharedPreferencesService>(),
+            localNotificationService, 
+          )..requestPermissions(),
+        ),
+      ],
+      child: const MainApp(),
     ),
-    Provider(
-      create: (context) => SqliteService(),
-    ),
-    Provider(
-      create: (context) => SharedPreferencesService(prefs),
-    ),
-    ChangeNotifierProvider(
-      create: (context) => IndexNavProvider(),
-    ),
-    ChangeNotifierProvider(
-        create: (context) =>
-            FavoriteListProvider(context.read<SqliteService>())),
-    Provider(create: (context) => ApiService()),
-    ChangeNotifierProvider(
-        create: (context) =>
-            RestaurantListProvider(context.read<ApiService>())),
-    ChangeNotifierProvider(
-        create: (context) =>
-            RestaurantDetailProvider(context.read<ApiService>())),
-    ChangeNotifierProvider(
-      create: (context) => SettingProvider(
-        context.read<SharedPreferencesService>(),
-      ),
-    ),
-  ], child: const MainApp()));
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -55,29 +56,25 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SettingProvider(context.read<
-          SharedPreferencesService>()), // Memastikan ada instance SettingProvider
-      child: Consumer<SettingProvider>(
-        builder: (context, themeProvider, child) {
-          return MaterialApp(
-            title: 'Restaurant',
-            debugShowCheckedModeBanner: false,
-            theme: RestaurantTheme.lightTheme,
-            darkTheme: RestaurantTheme.darkTheme,
-            themeMode:
-                themeProvider.themeMode, // Mengakses themeMode dengan benar
-            initialRoute: NavigationRoute.mainRoute.name,
-            routes: {
-              NavigationRoute.mainRoute.name: (context) => const MainScreen(),
-              NavigationRoute.detailRoute.name: (context) => DetailScreen(
-                    restaurantId:
-                        ModalRoute.of(context)?.settings.arguments as String,
-                  ),
-            },
-          );
-        },
-      ),
+    return Consumer<SettingProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Restaurant',
+          debugShowCheckedModeBanner: false,
+          theme: RestaurantTheme.lightTheme,
+          darkTheme: RestaurantTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          initialRoute: NavigationRoute.mainRoute.name,
+          routes: {
+            NavigationRoute.mainRoute.name: (context) => const MainScreen(),
+            NavigationRoute.detailRoute.name: (context) => DetailScreen(
+                  restaurantId:
+                      ModalRoute.of(context)?.settings.arguments as String,
+                ),
+          },
+        );
+      },
     );
   }
 }
+
