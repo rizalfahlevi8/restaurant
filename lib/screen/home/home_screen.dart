@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    key: ValueKey("searchField"),
                     controller: _searchController,
                     decoration: InputDecoration(
                       labelText: 'Search Restaurants',
@@ -61,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 IconButton(
+                  key: ValueKey("searchButton"),
                   icon: Icon(Icons.search),
                   onPressed: () {
                     final query = _searchController.text;
@@ -81,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   RestaurantListResultLoadedState(data: var restaurantList) =>
                     ListView.builder(
+                        key: ValueKey("result"),
                         itemCount: restaurantList.length,
                         itemBuilder: (context, index) {
                           final restaurant = restaurantList[index];
@@ -104,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           SizedBox(height: 20),
                           Text(
+                            key: ValueKey("result"),
                             message,
                             style: TextStyle(
                               fontSize: 16,

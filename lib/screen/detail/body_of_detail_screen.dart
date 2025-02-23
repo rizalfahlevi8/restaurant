@@ -48,7 +48,7 @@ class _BodyOfDetailScreenState extends State<BodyOfDetailScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            widget.restaurant.address + ', ',
+                            widget.restaurant.address! + ', ',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelLarge

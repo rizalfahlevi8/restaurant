@@ -9,7 +9,7 @@ class Restaurant {
   final String pictureId;
   final String city;
   final double rating;
-  final String address;
+  final String? address;
   List<Category>? categories;
   Menus? menus;
   List<CustomerReview>? customerReviews;
@@ -21,7 +21,7 @@ class Restaurant {
     required this.pictureId,
     required this.city,
     required this.rating,
-    required this.address,
+    this.address,
     this.categories,
     this.menus,
     this.customerReviews,
