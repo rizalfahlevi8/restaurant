@@ -12,7 +12,7 @@ void callbackDispatcher() {
 
         DateTime now = DateTime.now();
 
-        if (now.hour == 7 && now.minute >= 0 && now.minute <= 59) {
+        if (now.hour == 11 && now.minute >= 0 && now.minute <= 15) {
           final apiService = ApiService();
           final notificationService = LocalNotificationService();
 

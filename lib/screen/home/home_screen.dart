@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant/data/model/received_notivication.dart';
 import 'package:restaurant/provider/home/restaurant_list_provider.dart';
-import 'package:restaurant/provider/setting/payload_provider.dart';
 import 'package:restaurant/screen/home/restaurant_card_widget.dart';
 import 'package:restaurant/services/local_notification_service.dart';
 import 'package:restaurant/static/navigation_route.dart';
@@ -21,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _configureSelectNotificationSubject() {
     selectNotificationStream.stream.listen((String? payload) {
       if (payload != null && payload.isNotEmpty) {
-        // context.read<PayloadProvider>().payload = payload;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushNamed(
@@ -29,13 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
             NavigationRoute.detailRoute.name,
             arguments: payload,
           );
-          // Navigator.pushNamed(
-          //   context,
-          //   NavigationRoute.detailRoute.name,
-          //   arguments: payload,
-          // ).then((_) {
-          //   context.read<PayloadProvider>().payload = null;
-          // });
         });
       }
     });
@@ -44,8 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _configureDidReceiveLocalNotificationSubject() {
     didReceiveLocalNotificationStream.stream
         .listen((ReceivedNotification receivedNotification) {
-      final payload = receivedNotification.payload;
-      // context.read<PayloadProvider>().payload = payload;
       Navigator.pushNamed(context, NavigationRoute.detailRoute.name,
           arguments: receivedNotification.payload);
     });

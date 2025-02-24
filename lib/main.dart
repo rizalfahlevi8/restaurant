@@ -96,25 +96,11 @@ class MainApp extends StatelessWidget {
           darkTheme: RestaurantTheme.darkTheme,
           themeMode: themeProvider.themeMode,
           initialRoute: initialRoute,
-          // routes: {
-          //   NavigationRoute.mainRoute.name: (context) => const MainScreen(),
-          //   NavigationRoute.detailRoute.name: (context) {
-          //     final payload = context.watch<PayloadProvider>().payload;
-          //     return DetailScreen(
-          //       restaurantId: payload ??
-          //           ModalRoute.of(context)?.settings.arguments as String,
-          //     );
-          //   },
-          // },
           onGenerateRoute: (settings) {
             if (settings.name == NavigationRoute.detailRoute.name) {
               final payloadProvider = context.read<PayloadProvider>();
               final payload = payloadProvider.payload;
-
-              // Gunakan payload jika ada, jika tidak gunakan arguments dari pushNamed
               final restaurantId = payload ?? settings.arguments as String;
-
-              // Reset payload setelah digunakan
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 payloadProvider.clearPayload();
               });
