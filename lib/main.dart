@@ -4,6 +4,7 @@ import 'package:restaurant/data/api/api_service.dart';
 import 'package:restaurant/provider/detail/favorite_list_provider.dart';
 import 'package:restaurant/provider/detail/restaurant_detail_provider.dart';
 import 'package:restaurant/provider/home/restaurant_list_provider.dart';
+import 'package:restaurant/provider/setting/payload_provider.dart';
 import 'package:restaurant/provider/setting/setting_provider.dart';
 import 'package:restaurant/provider/main/index_nav_provider.dart';
 import 'package:restaurant/screen/detail/detail_screen.dart';
@@ -11,6 +12,7 @@ import 'package:restaurant/screen/main/main_screen.dart';
 import 'package:restaurant/services/local_notification_service.dart';
 import 'package:restaurant/services/shared_preferences_service.dart';
 import 'package:restaurant/services/sqlite_service.dart';
+import 'package:restaurant/services/workmanager_service.dart';
 import 'package:restaurant/static/navigation_route.dart';
 import 'package:restaurant/style/theme/restaurant_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,37 +24,66 @@ void main() async {
   await localNotificationService.init();
   await localNotificationService.configureLocalTimeZone();
 
+  final workmanagerService = WorkmanagerService();
+  await workmanagerService.init();
+
+  final notificationAppLaunchDetails =
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  String route = NavigationRoute.mainRoute.name;
+  String? payload;
+
+  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+    final notificationResponse =
+        notificationAppLaunchDetails?.notificationResponse;
+    if (notificationResponse != null) {
+      payload = notificationResponse.payload;
+      route = NavigationRoute.detailRoute.name;
+    }
+  }
+
   runApp(
     MultiProvider(
       providers: [
         Provider(create: (context) => localNotificationService),
+        Provider(create: (context) => workmanagerService),
         Provider(create: (context) => SqliteService()),
         Provider(create: (context) => SharedPreferencesService(prefs)),
-        ChangeNotifierProvider(create: (context) => IndexNavProvider()),
-        ChangeNotifierProvider(
-            create: (context) =>
-                FavoriteListProvider(context.read<SqliteService>())),
         Provider(create: (context) => ApiService()),
         ChangeNotifierProvider(
-            create: (context) =>
-                RestaurantListProvider(context.read<ApiService>())),
+          create: (context) => PayloadProvider(
+            payload: payload,
+          ),
+        ),
+        ChangeNotifierProvider(create: (context) => IndexNavProvider()),
         ChangeNotifierProvider(
-            create: (context) =>
-                RestaurantDetailProvider(context.read<ApiService>())),
+          create: (context) =>
+              FavoriteListProvider(context.read<SqliteService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              RestaurantListProvider(context.read<ApiService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              RestaurantDetailProvider(context.read<ApiService>()),
+        ),
         ChangeNotifierProvider(
           create: (context) => SettingProvider(
             context.read<SharedPreferencesService>(),
-            localNotificationService, 
+            localNotificationService,
           )..requestPermissions(),
         ),
       ],
-      child: const MainApp(),
+      child: MainApp(initialRoute: route),
     ),
   );
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final String initialRoute;
+  final String? payload;
+  const MainApp({super.key, required this.initialRoute, this.payload});
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +95,41 @@ class MainApp extends StatelessWidget {
           theme: RestaurantTheme.lightTheme,
           darkTheme: RestaurantTheme.darkTheme,
           themeMode: themeProvider.themeMode,
-          initialRoute: NavigationRoute.mainRoute.name,
-          routes: {
-            NavigationRoute.mainRoute.name: (context) => const MainScreen(),
-            NavigationRoute.detailRoute.name: (context) => DetailScreen(
-                  restaurantId:
-                      ModalRoute.of(context)?.settings.arguments as String,
-                ),
+          initialRoute: initialRoute,
+          // routes: {
+          //   NavigationRoute.mainRoute.name: (context) => const MainScreen(),
+          //   NavigationRoute.detailRoute.name: (context) {
+          //     final payload = context.watch<PayloadProvider>().payload;
+          //     return DetailScreen(
+          //       restaurantId: payload ??
+          //           ModalRoute.of(context)?.settings.arguments as String,
+          //     );
+          //   },
+          // },
+          onGenerateRoute: (settings) {
+            if (settings.name == NavigationRoute.detailRoute.name) {
+              final payloadProvider = context.read<PayloadProvider>();
+              final payload = payloadProvider.payload;
+
+              // Gunakan payload jika ada, jika tidak gunakan arguments dari pushNamed
+              final restaurantId = payload ?? settings.arguments as String;
+
+              // Reset payload setelah digunakan
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                payloadProvider.clearPayload();
+              });
+
+              return MaterialPageRoute(
+                builder: (context) => DetailScreen(restaurantId: restaurantId),
+              );
+            }
+
+            return MaterialPageRoute(
+              builder: (context) => const MainScreen(),
+            );
           },
         );
       },
     );
   }
 }
-

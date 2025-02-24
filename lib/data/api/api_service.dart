@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:restaurant/data/model/restaurant_detail_response.dart';
 import 'package:restaurant/data/model/restaurant_list_response.dart';
@@ -17,6 +18,19 @@ class ApiService {
     } else {
       throw Exception("Failed to load restaurant list");
     }
+  }
+
+  Future<Map<String, dynamic>> fetchRandomRestaurant() async {
+    final response = await http.get(Uri.parse("$_baseUrl/list"));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final restaurants = data['restaurants'];
+      if (restaurants.isNotEmpty) {
+        final randomIndex = Random().nextInt(restaurants.length);
+        return restaurants[randomIndex];
+      }
+    }
+    throw Exception("Failed to fetch restaurants");
   }
 
   Future<RestaurantDetailResponse> getRestaurantDetail(String id) async {
@@ -53,7 +67,7 @@ class ApiService {
       }),
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201){
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return RestaurantReviewResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception("Failed to load restaurant detail");

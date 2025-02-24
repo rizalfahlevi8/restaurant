@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant/data/model/received_notivication.dart';
 import 'package:restaurant/provider/home/restaurant_list_provider.dart';
+import 'package:restaurant/provider/setting/payload_provider.dart';
 import 'package:restaurant/screen/home/restaurant_card_widget.dart';
+import 'package:restaurant/services/local_notification_service.dart';
 import 'package:restaurant/static/navigation_route.dart';
 import 'package:restaurant/static/restaurant_list_result_state.dart';
 
@@ -15,12 +18,53 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
+  void _configureSelectNotificationSubject() {
+    selectNotificationStream.stream.listen((String? payload) {
+      if (payload != null && payload.isNotEmpty) {
+        // context.read<PayloadProvider>().payload = payload;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushNamed(
+            context,
+            NavigationRoute.detailRoute.name,
+            arguments: payload,
+          );
+          // Navigator.pushNamed(
+          //   context,
+          //   NavigationRoute.detailRoute.name,
+          //   arguments: payload,
+          // ).then((_) {
+          //   context.read<PayloadProvider>().payload = null;
+          // });
+        });
+      }
+    });
+  }
+
+  void _configureDidReceiveLocalNotificationSubject() {
+    didReceiveLocalNotificationStream.stream
+        .listen((ReceivedNotification receivedNotification) {
+      final payload = receivedNotification.payload;
+      // context.read<PayloadProvider>().payload = payload;
+      Navigator.pushNamed(context, NavigationRoute.detailRoute.name,
+          arguments: receivedNotification.payload);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _configureSelectNotificationSubject();
+    _configureDidReceiveLocalNotificationSubject();
     Future.microtask(() {
       context.read<RestaurantListProvider>().fetchRestaurantList();
     });
+  }
+
+  @override
+  void dispose() {
+    didReceiveLocalNotificationStream.close();
+    super.dispose();
   }
 
   @override
@@ -144,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      
     );
   }
 }

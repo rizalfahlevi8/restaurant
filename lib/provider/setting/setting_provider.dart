@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant/services/local_notification_service.dart';
 import 'package:restaurant/services/shared_preferences_service.dart';
+import 'package:restaurant/services/workmanager_service.dart';
 
 class SettingProvider extends ChangeNotifier {
   final SharedPreferencesService _service;
@@ -60,7 +61,8 @@ class SettingProvider extends ChangeNotifier {
 
     if (_isReminderEnabled) {
       _notificationId += 1;
-      flutterNotificationService.scheduleDailyElevenAMNotification(id: _notificationId);
+      flutterNotificationService.scheduleDailyElevenAMNotification(
+          id: _notificationId);
     }
 
     notifyListeners();
@@ -74,12 +76,17 @@ class SettingProvider extends ChangeNotifier {
     _isReminderEnabled = !_isReminderEnabled;
     await _service.saveReminder(_isReminderEnabled);
 
+    final workmanagerService = WorkmanagerService();
+
     if (_isReminderEnabled) {
       _notificationId += 1;
       flutterNotificationService.scheduleDailyElevenAMNotification(
         id: _notificationId,
       );
+      _notificationId += 1;
+      await workmanagerService.runPeriodicTask(notificationId: _notificationId);
     } else {
+      await workmanagerService.cancelAllTask();
       await flutterNotificationService.cancelReminder();
     }
 
