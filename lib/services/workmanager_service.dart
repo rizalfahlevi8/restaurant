@@ -10,21 +10,17 @@ void callbackDispatcher() {
       if (task == MyWorkmanager.periodic.taskName) {
         int notificationId = inputData?["notificationId"] ?? 0;
 
-        DateTime now = DateTime.now();
+        final apiService = ApiService();
+        final notificationService = LocalNotificationService();
 
-        if (now.hour == 11 && now.minute >= 0 && now.minute <= 15) {
-          final apiService = ApiService();
-          final notificationService = LocalNotificationService();
-
-          final restaurant = await apiService.fetchRandomRestaurant();
-          await notificationService.showNotification(
-            id: notificationId,
-            title: "Rekomendasi Restoran Hari Ini",
-            body:
-                "Coba kunjungi Restaurant ${restaurant['name']} di kota ${restaurant['city']}",
-            payload: "${restaurant['id']}",
-          );
-        }
+        final restaurant = await apiService.fetchRandomRestaurant();
+        await notificationService.showNotification(
+          id: notificationId,
+          title: "Rekomendasi Restoran Hari Ini",
+          body:
+              "Coba kunjungi Restaurant ${restaurant['name']} di kota ${restaurant['city']}",
+          payload: "${restaurant['id']}",
+        );
       }
       return Future.value(true);
     },
@@ -41,11 +37,15 @@ class WorkmanagerService {
   }
 
   Future<void> runPeriodicTask({required int notificationId}) async {
+    final now = DateTime.now().toLocal();
+    final int remainingMinutes = 60 - now.minute;
+    final Duration initialDelay = Duration(minutes: remainingMinutes);
+
     await _workmanager.registerPeriodicTask(
       MyWorkmanager.periodic.uniqueName,
       MyWorkmanager.periodic.taskName,
-      frequency: const Duration(minutes: 15),
-      initialDelay: Duration.zero,
+      frequency: const Duration(hours: 1),
+      initialDelay: initialDelay,
       inputData: {"notificationId": notificationId},
     );
   }

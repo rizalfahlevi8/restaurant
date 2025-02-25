@@ -36,7 +36,7 @@ class RestaurantCard extends StatelessWidget {
                         width: 120,
                         height: 80,
                         color: Colors.grey[300],
-                        child: Icon(Icons.broken_image,
+                        child: Icon(Icons.wifi_off,
                             size: 40, color: Colors.grey[600]),
                       );
                     },
