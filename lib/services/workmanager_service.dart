@@ -37,14 +37,29 @@ class WorkmanagerService {
   }
 
   Future<void> runPeriodicTask({required int notificationId}) async {
-    final now = DateTime.now().toLocal();
-    final int remainingMinutes = 60 - now.minute;
-    final Duration initialDelay = Duration(minutes: remainingMinutes);
+    final now = DateTime.now();
+    final DateTime scheduledTime =
+        DateTime(now.year, now.month, now.day, 11);
+
+    if (now.isAfter(scheduledTime)) {
+      scheduledTime.add(const Duration(days: 1));
+    }
+
+    final Duration initialDelay = scheduledTime.difference(now);
+
+    print("initialDelay: $initialDelay");
+
+    await _workmanager.registerOneOffTask(
+      "oneTimeTask",
+      MyWorkmanager.periodic.taskName,
+      initialDelay: initialDelay,
+      inputData: {"notificationId": notificationId},
+    );
 
     await _workmanager.registerPeriodicTask(
       MyWorkmanager.periodic.uniqueName,
       MyWorkmanager.periodic.taskName,
-      frequency: const Duration(hours: 1),
+      frequency: const Duration(days: 1), 
       initialDelay: initialDelay,
       inputData: {"notificationId": notificationId},
     );
