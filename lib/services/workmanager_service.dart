@@ -47,8 +47,6 @@ class WorkmanagerService {
 
     final Duration initialDelay = scheduledTime.difference(now);
 
-    print("initialDelay: $initialDelay");
-
     await _workmanager.registerOneOffTask(
       "oneTimeTask",
       MyWorkmanager.periodic.taskName,
