@@ -1,0 +1,2 @@
+D:/1ProgramFile/Github/restaurant/android/app/.cxx/RelWithDebInfo/463j5uv3/x86/CMakeFiles/edit_cache.dir
+D:/1ProgramFile/Github/restaurant/android/app/.cxx/RelWithDebInfo/463j5uv3/x86/CMakeFiles/rebuild_cache.dir

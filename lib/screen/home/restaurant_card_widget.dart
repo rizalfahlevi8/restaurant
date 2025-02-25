@@ -18,24 +18,33 @@ class RestaurantCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: 80,
-                  minHeight: 80,
-                  maxWidth: 120,
-                  minWidth: 120,
+              constraints: BoxConstraints(
+                maxHeight: 80,
+                minHeight: 80,
+                maxWidth: 120,
+                minWidth: 120,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Hero(
+                  tag: restaurant.pictureId,
+                  child: Image.network(
+                    'https://restaurant-api.dicoding.dev/images/small/${restaurant.pictureId}',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 120,
+                        height: 80,
+                        color: Colors.grey[300],
+                        child: Icon(Icons.broken_image,
+                            size: 40, color: Colors.grey[600]),
+                      );
+                    },
+                  ),
                 ),
-                child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Hero(
-                      tag: restaurant.pictureId,
-                      child: Image.network(
-                        'https://restaurant-api.dicoding.dev/images/small/${restaurant.pictureId}',
-                        fit: BoxFit.cover,
-                      ),
-                    ))),
-            SizedBox.square(
-              dimension: 8,
+              ),
             ),
+            SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,33 +52,25 @@ class RestaurantCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(restaurant.name),
-                  SizedBox.square(
-                    dimension: 6,
-                  ),
+                  SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(Icons.location_on),
-                      SizedBox.square(
-                        dimension: 4,
-                      ),
+                      SizedBox(width: 4),
                       Expanded(child: Text(restaurant.city)),
                     ],
                   ),
-                  SizedBox.square(
-                    dimension: 4,
-                  ),
+                  SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amberAccent,),
-                      SizedBox.square(
-                        dimension: 4,
-                      ),
+                      Icon(Icons.star, color: Colors.amberAccent),
+                      SizedBox(width: 4),
                       Expanded(child: Text(restaurant.rating.toString())),
                     ],
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

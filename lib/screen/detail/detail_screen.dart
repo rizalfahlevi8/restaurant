@@ -18,31 +18,40 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask((){
-      context.read<RestaurantDetailProvider>().fetchRestaurantDetail(widget.restaurantId);
+    Future.microtask(() {
+      context
+          .read<RestaurantDetailProvider>()
+          .fetchRestaurantDetail(widget.restaurantId);
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Restaurant Detail"),
         actions: [
-         ChangeNotifierProvider(
-           create: (context) => FavoriteIconProvider(),
-           child: Consumer<RestaurantDetailProvider>(builder: (context, value, child){
-            return switch(value.resultState){
-              RestaurantDetailLoadedState(data: var restaurant) => FavoriteIconWidget(restaurant: restaurant),
-              _ => const SizedBox(),
-            };
-           }),
-         ),
-       ],
+          ChangeNotifierProvider(
+            create: (context) => FavoriteIconProvider(),
+            child: Consumer<RestaurantDetailProvider>(
+                builder: (context, value, child) {
+              return switch (value.resultState) {
+                RestaurantDetailLoadedState(data: var restaurant) =>
+                  FavoriteIconWidget(restaurant: restaurant),
+                _ => const SizedBox(),
+              };
+            }),
+          ),
+        ],
       ),
-      body: Consumer<RestaurantDetailProvider>(builder: (context, value, child){
-        return switch (value.resultState){
-          RestaurantDetailLoadingState() => Center(child: CircularProgressIndicator(),),
-          RestaurantDetailLoadedState(data: var restaurant) => BodyOfDetailScreen(restaurant: restaurant),
+      body:
+          Consumer<RestaurantDetailProvider>(builder: (context, value, child) {
+        return switch (value.resultState) {
+          RestaurantDetailLoadingState() => Center(
+              child: CircularProgressIndicator(),
+            ),
+          RestaurantDetailLoadedState(data: var restaurant) =>
+            BodyOfDetailScreen(restaurant: restaurant),
           RestaurantDetailErrorState(error: var message) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,7 +79,10 @@ class _DetailScreenState extends State<DetailScreen> {
                           .fetchRestaurantDetail(widget.restaurantId);
                     },
                     icon: Icon(Icons.refresh),
-                    label: Text('Coba Lagi', style: TextStyle(fontWeight: FontWeight.w600),),
+                    label: Text(
+                      'Coba Lagi',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Theme.of(context).primaryColor,
                       padding:

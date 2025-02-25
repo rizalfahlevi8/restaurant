@@ -18,7 +18,8 @@ class FavoriteListProvider extends ChangeNotifier {
 
   Future<void> loadAllFavoriteValue() async {
     try {
-      _favoriteList = await _service.getAllItems();
+      final newList = await _service.getAllItems();
+      _favoriteList = List.from(newList);
       _message = "All of your data is loaded";
       notifyListeners();
     } catch (e) {

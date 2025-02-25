@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: Icon(Icons.refresh),
                             label: Text(
                               'Coba Lagi',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Theme.of(context).primaryColor,
